@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom'; // Added useNavigate
 import { FaCar, FaMotorcycle, FaBars, FaTimes, FaUser, FaCalendarAlt } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { signOutUser } from '../firebase/auth';
@@ -7,7 +7,7 @@ import { signOutUser } from '../firebase/auth';
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Initialize useNavigate
   const { user, isAdmin } = useAuth();
 
   const toggleMenu = () => {
@@ -19,15 +19,22 @@ const Navbar = () => {
   };
 
   const handleLogout = async () => {
+    closeMenu(); // Close menu if open
     try {
       await signOutUser();
+      navigate('/'); // Redirect to home page after successful logout
     } catch (error) {
       console.error('Failed to log out:', error);
+      // Optionally display an error message to the user
     }
   };
 
   const isActive = (path) => {
-    return location.pathname === path ? 'text-primary font-semibold' : 'text-gray-700 hover:text-primary';
+    // Handle '/' specifically to avoid matching sub-routes like '/cars'
+    if (path === '/') {
+      return location.pathname === '/' ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600';
+    }
+    return location.pathname.startsWith(path) ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600';
   };
 
   return (
@@ -37,46 +44,47 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2" onClick={closeMenu}>
             <div className="flex items-center">
-              <FaCar className="text-primary text-2xl" />
-              <FaMotorcycle className="text-accent text-2xl ml-1" />
+              {/* Using Tailwind classes directly for colors */}
+              <FaCar className="text-blue-600 text-2xl" /> 
+              <FaMotorcycle className="text-green-500 text-2xl ml-1" /> 
             </div>
             <span className="text-xl font-bold text-gray-800">RideRental</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className={`${isActive('/')} transition-colors duration-300`}>
+          <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
+            <Link to="/" className={`${isActive('/')} transition-colors duration-300 text-sm lg:text-base`}>
               Home
             </Link>
-            <Link to="/cars" className={`${isActive('/cars')} transition-colors duration-300`}>
+            <Link to="/cars" className={`${isActive('/cars')} transition-colors duration-300 text-sm lg:text-base`}>
               Cars
             </Link>
-            <Link to="/bikes" className={`${isActive('/bikes')} transition-colors duration-300`}>
+            <Link to="/bikes" className={`${isActive('/bikes')} transition-colors duration-300 text-sm lg:text-base`}>
               Bikes
             </Link>
-            <Link to="/about" className={`${isActive('/about')} transition-colors duration-300`}>
+            <Link to="/about" className={`${isActive('/about')} transition-colors duration-300 text-sm lg:text-base`}>
               About
             </Link>
-            <Link to="/contact" className={`${isActive('/contact')} transition-colors duration-300`}>
+            <Link to="/contact" className={`${isActive('/contact')} transition-colors duration-300 text-sm lg:text-base`}>
               Contact
             </Link>
             {user ? (
               <>
-                <Link to="/my-bookings" className={`${isActive('/my-bookings')} transition-colors duration-300 flex items-center`}>
+                <Link to="/my-bookings" className={`${isActive('/my-bookings')} transition-colors duration-300 flex items-center text-sm lg:text-base`}>
                   <FaCalendarAlt className="mr-1" />
                   My Bookings
                 </Link>
-                {isAdmin() && (
+                {isAdmin && (
                   <Link
                     to="/admin"
-                    className="text-gray-700 hover:text-primary transition-colors duration-300 flex items-center"
+                    className={`${isActive('/admin')} transition-colors duration-300 flex items-center text-sm lg:text-base`}
                   >
-                    Admin Dashboard
+                    Admin
                   </Link>
                 )}
                 <button 
-                  onClick={handleLogout}
-                  className="text-gray-700 hover:text-primary transition-colors duration-300 flex items-center"
+                  onClick={handleLogout} // Use the updated handler
+                  className="text-gray-700 hover:text-blue-600 transition-colors duration-300 flex items-center text-sm lg:text-base"
                 >
                   <FaUser className="mr-1" />
                   Logout
@@ -84,10 +92,10 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                <Link to="/login" className={`${isActive('/login')} transition-colors duration-300`}>
+                <Link to="/login" className={`${isActive('/login')} transition-colors duration-300 text-sm lg:text-base`}>
                   Login
                 </Link>
-                <Link to="/signup" className={`${isActive('/signup')} transition-colors duration-300`}>
+                <Link to="/register" className={`${isActive('/register')} transition-colors duration-300 text-sm lg:text-base bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700`}>
                   Sign Up
                 </Link>
               </>
@@ -98,7 +106,7 @@ const Navbar = () => {
           <div className="md:hidden">
             <button
               onClick={toggleMenu}
-              className="text-gray-700 hover:text-primary focus:outline-none"
+              className="text-gray-700 hover:text-blue-600 focus:outline-none"
               aria-label="Toggle menu"
             >
               {isMenuOpen ? (
@@ -112,67 +120,68 @@ const Navbar = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden mt-4 pb-4">
-            <div className="flex flex-col space-y-4">
+          <div className="md:hidden mt-4 pb-4 border-t border-gray-200">
+            <div className="flex flex-col space-y-3 pt-3">
               <Link
                 to="/"
-                className={`${isActive('/')} block px-2 py-1 rounded hover:bg-gray-100`}
+                className={`${isActive('/')} block px-3 py-2 rounded hover:bg-gray-100`}
                 onClick={closeMenu}
               >
                 Home
               </Link>
               <Link
                 to="/cars"
-                className={`${isActive('/cars')} block px-2 py-1 rounded hover:bg-gray-100`}
+                className={`${isActive('/cars')} block px-3 py-2 rounded hover:bg-gray-100`}
                 onClick={closeMenu}
               >
                 Cars
               </Link>
               <Link
                 to="/bikes"
-                className={`${isActive('/bikes')} block px-2 py-1 rounded hover:bg-gray-100`}
+                className={`${isActive('/bikes')} block px-3 py-2 rounded hover:bg-gray-100`}
                 onClick={closeMenu}
               >
                 Bikes
               </Link>
               <Link
                 to="/about"
-                className={`${isActive('/about')} block px-2 py-1 rounded hover:bg-gray-100`}
+                className={`${isActive('/about')} block px-3 py-2 rounded hover:bg-gray-100`}
                 onClick={closeMenu}
               >
                 About
               </Link>
               <Link
                 to="/contact"
-                className={`${isActive('/contact')} block px-2 py-1 rounded hover:bg-gray-100`}
+                className={`${isActive('/contact')} block px-3 py-2 rounded hover:bg-gray-100`}
                 onClick={closeMenu}
               >
                 Contact
               </Link>
+              
+              <hr className="my-2"/>
+
               {user ? (
                 <>
                   <Link
                     to="/my-bookings"
-                    className={`${isActive('/my-bookings')} block px-2 py-1 rounded hover:bg-gray-100 flex items-center`}
+                    className={`${isActive('/my-bookings')} block px-3 py-2 rounded hover:bg-gray-100 flex items-center`}
                     onClick={closeMenu}
                   >
                     <FaCalendarAlt className="mr-2" />
                     My Bookings
                   </Link>
-                  {isAdmin() && (
+                  {isAdmin && (
                     <Link
                       to="/admin"
-                      className="text-gray-700 hover:text-primary block px-2 py-1 rounded hover:bg-gray-100 flex items-center"
+                      className={`${isActive('/admin')} block px-3 py-2 rounded hover:bg-gray-100 flex items-center`}
+                      onClick={closeMenu}
                     >
                       Admin Dashboard
                     </Link>
                   )}
                   <button
-                    onClick={() => {
-                      handleLogout();
-                      closeMenu();
-                    }}
-                    className="text-gray-700 hover:text-primary block px-2 py-1 rounded hover:bg-gray-100 flex items-center w-full"
+                    onClick={handleLogout} // Use the updated handler
+                    className="text-red-600 hover:text-red-800 block px-3 py-2 rounded hover:bg-red-50 flex items-center w-full text-left"
                   >
                     <FaUser className="mr-2" />
                     Logout
@@ -182,14 +191,14 @@ const Navbar = () => {
                 <>
                   <Link
                     to="/login"
-                    className={`${isActive('/login')} block px-2 py-1 rounded hover:bg-gray-100`}
+                    className={`${isActive('/login')} block px-3 py-2 rounded hover:bg-gray-100`}
                     onClick={closeMenu}
                   >
                     Login
                   </Link>
                   <Link
-                    to="/signup"
-                    className={`${isActive('/signup')} block px-2 py-1 rounded hover:bg-gray-100`}
+                    to="/register"
+                    className={`${isActive('/register')} block px-3 py-2 rounded hover:bg-gray-100`}
                     onClick={closeMenu}
                   >
                     Sign Up
@@ -204,4 +213,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar; 
+export default Navbar;
